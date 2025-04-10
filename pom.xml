@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>open-api-generator</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <api-spec.connection.url>
+            scm:git:https://jsampedrosqli:${env.GITHUB_CHECKOUT_TOKEN}@github.com/jsampedrosqli/open-api.git
+        </api-spec.connection.url>
+    </properties>
+
+    <dependencies>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-web</artifactId>-->
+<!--            <version>3.4.3</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.4.2</version>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>generate-openapi</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openapitools</groupId>
+                        <artifactId>openapi-generator-maven-plugin</artifactId>
+                        <version>7.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>generate-sources</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <inputSpec>${project.basedir}/target/yaml-specs/${relativeApiPath}</inputSpec>
+                            <generatorName>java</generatorName>
+                            <output>${project.build.directory}/generated-sources/openapi-client</output>
+                            <configOptions>
+                                <library>resttemplate</library>  <!-- Other options: feign, okhttp, retrofit2 -->
+                                <dateLibrary>java8</dateLibrary>
+                                <!--                        <generateSupportingFiles>true</generateSupportingFiles> &lt;!&ndash; Generates helper files &ndash;&gt;-->
+                            </configOptions>
+                            <apiPackage>com.example.client.api.${domain}.v${version}</apiPackage>
+                            <modelPackage>com.example.client.model.${domain}</modelPackage>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+                <version>1.11.2</version>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <id>clone-yaml</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>checkout</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <connectionUrl>${api-spec.connection.url}</connectionUrl>
+                    <checkoutDirectory>${project.build.directory}/yaml-specs</checkoutDirectory>
+                    <workingDirectory>${project.build.directory}/yaml-specs</workingDirectory>
+                    <scmVersion>master</scmVersion>
+                    <scmVersionType>branch</scmVersionType>
+                    <tag>HEAD</tag>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>run-generate-script</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>/bin/bash</executable>
+                            <arguments>
+                                <argument>${project.basedir}/generate-apis.sh</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+<!--            <plugin>-->
+<!--                <groupId>org.openapitools</groupId>-->
+<!--                <artifactId>openapi-generator-maven-plugin</artifactId>-->
+<!--                <version>7.2.0</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>generate-sources</id>-->
+<!--                        <goals>-->
+<!--                            <goal>generate</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <skip>true</skip>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--                <configuration>-->
+<!--                    <inputSpec>${project.basedir}/target/yaml-specs/src/specs/hybris/account/specification-v1.yaml</inputSpec>-->
+<!--                    <generatorName>spring</generatorName>-->
+<!--                    <output>${project.build.directory}/generated-sources/openapi-client</output>-->
+<!--                    <configOptions>-->
+<!--&lt;!&ndash;                        <library>resttemplate</library>  &lt;!&ndash; Other options: feign, okhttp, retrofit2 &ndash;&gt;&ndash;&gt;-->
+<!--                        <dateLibrary>java8</dateLibrary>-->
+<!--&lt;!&ndash;                        <generateSupportingFiles>true</generateSupportingFiles> &lt;!&ndash; Generates helper files &ndash;&gt;&ndash;&gt;-->
+<!--                    </configOptions>-->
+<!--&lt;!&ndash;                    <apiPackage>com.example.client.api</apiPackage>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <modelPackage>com.example.client.model</modelPackage>&ndash;&gt;-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+        </plugins>
+    </build>
+
+</project>

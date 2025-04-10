@@ -1,0 +1,168 @@
+openapi: 3.0.0
+info:
+  title: UserActionController-customerAdminRemoveUser
+  description: Delete customer profile.
+  version: 1.0.0
+servers:
+  - url: https://localhost:9002/sligrocommercewebservices/v2
+    description: DEV environment
+  - url: https://dev-hybris-app.sligro-digital.nl/sligrocommercewebservices/v2
+    description: DEV environment
+  - url: https://tst-hybris-app.sligro-digital.nl/sligrocommercewebservices/v2
+    description: TST environment
+  - url: https://acc-hybris-app.sligro-digital.nl/sligrocommercewebservices/v2
+    description: ACC environment
+  - url: https://prd-hybris.sligro-digital.nl/sligrocommercewebservices/v2
+    description: PRD environment
+tags:
+  - name: customerAdminRemoveUser_other
+    x-displayName: other
+  - name: IsAccountActivationTokenValid_other
+    x-displayName: other
+  - name: retriggerAccountActivation_other
+    x-displayName: other
+paths:
+  /{baseSiteId}/account/{userGuid}:
+    delete:
+      summary: Delete customer profile.
+      description: Removes customer profile.
+      parameters:
+        - name: baseSiteId
+          in: path
+          required: true
+          description: Base site identifier
+          schema:
+            type: string
+            minimum: 1
+        - name: userGuid
+          in: path
+          required: true
+          description: userGuid to remove
+          schema:
+            type: string
+            minimum: 1
+      responses:
+        '200':
+          description: indicating the validation result
+        '204':
+          description: indicating the validation result
+        '401':
+          description: indicating the validation result
+        '403':
+          description: indicating the validation result
+      tags:
+        - customerAdminRemoveUser_other
+      security:
+        - BasicAuth: []
+  /{baseSiteId}/account/tokenvalidity:
+    get:
+      summary: Checks if account activation token is valid.
+      description: >-
+        Checks if the provided account activation token for the given customer
+        unit is validLocationCustomerServiceImpl.
+      operationId: validateAccountToken
+      parameters:
+        - name: baseSiteId
+          in: path
+          required: true
+          description: Base site identifier
+          schema:
+            type: string
+        - name: token
+          in: query
+          required: true
+          description: Account activation token
+          schema:
+            type: string
+      responses:
+        '200':
+          description: indicating the validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenValidityWsDTO'
+        '401':
+          description: indicating the validation result
+        '403':
+          description: indicating the validation result
+        '404':
+          description: indicating the validation result
+      tags:
+        - IsAccountActivationTokenValid_other
+      security:
+        - BasicAuth: []
+  /{baseSiteId}/account/token/retrigger:
+    post:
+      summary: >-
+        Reactivate Account Activation token if account activation token is
+        expired.
+      description: Sends out new activation token to first customeradmin.
+      parameters:
+        - name: baseSiteId
+          in: path
+          required: true
+          description: Base site identifier
+          schema:
+            type: string
+            minimum: 1
+      responses:
+        '200':
+          description: indicating the validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenValidityWsDTO'
+        '201':
+          description: indicating the validation result
+        '401':
+          description: indicating the validation result
+        '403':
+          description: indicating the validation result
+        '404':
+          description: indicating the validation result
+      tags:
+        - retriggerAccountActivation_other
+      security:
+        - BasicAuth: []
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    TokenValidityWsDTO:
+      type: object
+      properties:
+        valid:
+          type: boolean
+          example: true/false
+        hasUsers:
+          type: boolean
+          example: true
+        expired:
+          type: boolean
+          example: true
+        maxReactivationCountReached:
+          type: boolean
+          example: true
+        maxTokenExpirationReached:
+          type: boolean
+          example: true
+        reactivationCount:
+          type: integer
+          example: 5
+        email:
+          type: string
+          example: john.doe@sligro.nl
+      required:
+        - email
+x-tagGroups:
+  - name: UserActionController-customerAdminRemoveUser
+    tags:
+      - customerAdminRemoveUser_other
+  - name: UserActionController-isAccountActivationTokenValid
+    tags:
+      - IsAccountActivationTokenValid_other
+  - name: UserActionController-retriggerAccountActivation
+    tags:
+      - retriggerAccountActivation_other
